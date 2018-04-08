@@ -1,17 +1,32 @@
 const bodyParser = require('body-parser');
 const express = require('express');
-const fs = require('fs');
+
+const getWord = require('./getWord.js');
+const code = require('../utils/statusCodes.js');
 
 const STATUS_USER_ERROR = 422;
 
 const app = express();
-// to enable parsing of json bodies for post requests
+const port = process.env.PORT || 8080;
+const wordToGuess = 'art';
+
 app.use(bodyParser.json());
 
-/* Returns a list of dictionary words from the words.txt file. */
-const readWords = () => {
-  const contents = fs.readFileSync('words.txt', 'utf8');
-  return contents.split('\n');
-};
+app.post('/api/guess', (req, res) => {
+  if (req.body.letter) {
+    res.status(code.STATUS_CREATED);
+    res.json({ success: 'true', guess: req.body.letter });
+    return;
+  }
 
-console.log(readWords());
+  res.status(code.STATUS_USER_ERROR);
+  res.json({ error: 'Error Message' });
+});
+
+if (!module.parent) {
+  app.listen(port, () => {
+    console.log(`Listening at port: ${port}`);
+  });
+}
+
+module.exports = app;
