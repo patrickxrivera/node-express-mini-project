@@ -3,7 +3,6 @@ const chaiHttp = require('chai-http');
 const code = require('../utils/statusCodes.js');
 
 const server = require('../src/app.js').app;
-let guesses = require('../src/app.js').guesses;
 
 const expect = chai.expect;
 
@@ -11,7 +10,7 @@ chai.use(chaiHttp);
 
 describe('API ROUTES', () => {
   beforeEach(() => {
-    guesses = [];
+    process.env.NODE_ENV = 'test';
   });
 
   describe('POST /api/guess', () => {
@@ -64,5 +63,9 @@ describe('API ROUTES', () => {
       expect(res.body).to.be.a('object');
       expect(res.body).to.deep.equal(getRes);
     });
+  });
+
+  afterEach(() => {
+    process.env.NODE_ENV = 'development';
   });
 });

@@ -8,8 +8,8 @@ const STATUS_USER_ERROR = 422;
 
 const app = express();
 const port = process.env.PORT || 8080;
+let wordToGuess;
 
-const wordToGuess = 'art';
 const guesses = [];
 
 app.use(bodyParser.json());
@@ -18,10 +18,14 @@ const alreadyGuessed = (letter) => {
   return guesses.indexOf(letter) !== -1;
 };
 
+const buildWord = letter => (alreadyGuessed(letter) ? '-' : letter);
+
 app.get('/api', (req, res) => {
+  wordToGuess = process.env.NODE_ENV === 'test' ? 'art' : getWord();
+
   const wordSoFar = wordToGuess
     .split('')
-    .map(letter => (alreadyGuessed(letter) ? '-' : letter))
+    .map(buildWord)
     .join('');
 
   res.json({ wordSoFar, guesses });
@@ -47,4 +51,4 @@ if (!module.parent) {
   });
 }
 
-module.exports = { app, guesses };
+module.exports = { app, guesses, wordToGuess };
