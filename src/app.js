@@ -8,19 +8,37 @@ const STATUS_USER_ERROR = 422;
 
 const app = express();
 const port = process.env.PORT || 8080;
+
 const wordToGuess = 'art';
+const guesses = [];
 
 app.use(bodyParser.json());
 
+const alreadyGuessed = (letter) => {
+  return guesses.indexOf(letter) !== -1;
+};
+
+app.get('/api', (req, res) => {
+  const wordSoFar = wordToGuess
+    .split('')
+    .map(letter => (alreadyGuessed(letter) ? '-' : letter))
+    .join('');
+
+  res.json({ wordSoFar, guesses });
+});
+
 app.post('/api/guess', (req, res) => {
-  if (req.body.letter) {
-    res.status(code.STATUS_CREATED);
-    res.json({ success: 'true', guess: req.body.letter });
+  const { letter } = req.body;
+
+  if (!letter || alreadyGuessed(letter)) {
+    res.status(code.STATUS_USER_ERROR);
+    res.json({ error: 'Error Message' });
     return;
   }
 
-  res.status(code.STATUS_USER_ERROR);
-  res.json({ error: 'Error Message' });
+  guesses.push(letter);
+  res.status(code.STATUS_CREATED);
+  res.json({ success: 'true', guess: letter });
 });
 
 if (!module.parent) {
@@ -29,4 +47,4 @@ if (!module.parent) {
   });
 }
 
-module.exports = app;
+module.exports = { app, guesses };
